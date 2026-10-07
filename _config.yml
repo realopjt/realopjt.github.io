@@ -1,0 +1,7 @@
+title: Checking AI maths
+description: Independent checks of results from OpenAI's October 2026 maths release.
+theme: minima
+author: realopjt
+minima:
+  social_links:
+    github: realopjt
