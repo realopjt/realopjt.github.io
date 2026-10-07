@@ -4,35 +4,55 @@ title: "Checking an AI's maths"
 date: 2026-10-07 09:00:00 +0000
 ---
 
-I independently checked one of the results in OpenAI's new maths release, and it holds up: all 61 cases confirmed, by code that shares nothing with OpenAI's.
+**Short version:** OpenAI's AI claims to have proved a maths puzzle that's been open since 2012. Part of that proof is a huge computer calculation. I checked the calculation with my own program, built from scratch. It came out right.
 
-On 6 October 2026 OpenAI published 722 papers written by an unreleased model, claiming progress on problems mathematicians have worked on for decades. Most have not been peer reviewed, and only about a third have any computer-checked proof. The hard part is no longer producing proofs. It is checking them. I am not a mathematician, so I picked the kind of claim an outsider can check properly: one that comes down to a finite computation.
+## Why bother?
 
-## The result I checked
+On 6 October 2026, OpenAI released 722 maths papers written by an AI. Some claim to solve problems that experts have been stuck on for decades.
 
-One of the papers, [Universal Tensor Squares for Symmetric Groups](https://github.com/openai/math/blob/main/preprints/Universal-Tensor-Squares-for-Symmetric-Groups-September-24-2026/main.pdf), claims to prove the tensor square conjecture of Pak, Panova and Vallejo, which has been open since 2012.
+The catch: almost none of it has been checked by humans yet. Writing proofs is now fast. Checking them is slow. That's the bottleneck.
 
-In plain terms: the ways of shuffling n objects have a set of basic building blocks, its irreducible representations. The conjecture says that for almost every n, one of those building blocks, combined with itself, contains every building block at once. The only exceptions are n = 2, 4 and 9.
+I'm not a mathematician. But some of these proofs lean on a big computer calculation, and a calculation is something anyone careful can re-check. So I picked one.
 
-The paper proves this with a general argument for large n. For n up to 64 it relies on a computer search instead. That search is what I checked.
+## The puzzle, in plain English
+
+Think of a deck of n cards. There are lots of ways to shuffle it, and mathematicians break all those shuffles down into a set of basic "ingredients".
+
+The puzzle asks: for almost every deck size, is there one ingredient that, when you combine it with itself, produces every ingredient at least once?
+
+It's a bit like asking whether one paint colour, mixed with itself the right way, can produce every colour on the chart.
+
+The paper says yes, for every deck size except 2, 4 and 9. For big decks it gives a written argument. For decks up to 64 cards it relies on the computer to check each case. That computer part is what I checked.
 
 ## What I found
 
-The claim holds in all 61 degrees from n = 1 to 64 (excluding 2, 4 and 9).
+**It holds up.** Every one of the 61 deck sizes checks out.
 
-- **OpenAI's own scripts pass.** I re-ran them unchanged on separate hardware.
-- **The missing witnesses are now public.** OpenAI's log only records "success"; it never says which building block works for each n. I recovered and published all 61, for example (13, 10, 8, 7, 6, 6, 4, 3, 2, 2, 1, 1, 1) at n = 64.
-- **An independent program agrees.** I wrote a new checker in a different language, using different arithmetic and a different method for each step. It confirms every case: at n = 64 that is all 1,741,630 building blocks, each one shown to be present.
-- **Exact whole numbers agree for small n.** A third method, with no shortcuts in the arithmetic, matches the checker exactly up to n = 22 and confirms nothing works for 2, 4 and 9.
+- **I re-ran OpenAI's own code.** Same answers.
+- **I wrote my own program from scratch,** in a different language and using a different method. Same answers. For a 64-card deck, that meant confirming all 1,741,630 ingredients appear.
+- **I filled a gap.** OpenAI's records said "it works" for each deck size, but never said *which* ingredient does the job. I found and published all 61.
+- **A third check** using plain whole-number arithmetic agreed for smaller decks.
 
-The largest case took under six minutes on an ordinary two-core cloud machine.
+## What this doesn't prove
 
-## What this does not prove
-
-This covers the finite part of the paper only. The general argument for n above 64 is a written proof, and it still needs review by mathematicians in the field. My checker is independent in its code and arithmetic, but it rests on the same standard formulas any such check would use. And the witnesses came from OpenAI's search; my program confirms them rather than finding them.
+I checked the computer part, not the written argument for big decks. That still needs real mathematicians to read it.
 
 ## Why it matters
 
-AI can now produce research mathematics faster than people can check it. Independent replication is how the field decides what stands, and much of it does not need a professor: any claim that reduces to a computation can be rechecked by someone careful, with ordinary hardware. There are plenty more in OpenAI's release.
+AI can now produce maths faster than people can check it. Re-checking is how science decides what's true, and some of it doesn't need a PhD. There are plenty more results in OpenAI's release that could be checked the same way.
 
-Everything is public, with instructions to reproduce it in about 25 minutes: [github.com/realopjt/tensor-square-finite-check](https://github.com/realopjt/tensor-square-finite-check). I did this work with Claude (Anthropic). The mathematics and the original computation are OpenAI's.
+All the code and results are public: [github.com/realopjt/tensor-square-finite-check](https://github.com/realopjt/tensor-square-finite-check). I did this with help from Claude (Anthropic). The maths itself is OpenAI's.
+
+---
+
+## For mathematicians
+
+**Claim checked.** The finite-range proposition of [Universal Tensor Squares for Symmetric Groups](https://github.com/openai/math/blob/main/preprints/Universal-Tensor-Squares-for-Symmetric-Groups-September-24-2026/main.pdf): for every 1 ≤ n ≤ 64 with n ∉ {2, 4, 9} there is a self-conjugate λ ⊢ n with g(λ, λ, ν) > 0 for every ν ⊢ n (the tensor square conjecture of Pak, Panova and Vallejo in that range).
+
+**Witnesses.** OpenAI's log records only exit statuses. I recovered the witness λ for each n by adding a print statement to a copy of their search (no change to its logic), e.g. λ = (13, 10, 8, 7, 6, 6, 4, 3, 2, 2, 1, 1, 1) at n = 64. Full list in the repo.
+
+**Independent checker.** Rust, computing g(λ, λ, ν) = Σ_ρ χ^λ(ρ)² χ^ν(ρ) / z_ρ for all ν at once, modulo 2⁶¹ − 1 and 998244353 (OpenAI used 10⁹+7 and 10⁹+9). Differences from their implementation: rank-based partition indexing instead of hashed beta-set masks; border strips found from cells of hook length k and removed with the rim-hook formula instead of abacus bead moves; equal parts of ρ grouped by multiplicity with weight 1/(k^m m!) and a Horner scheme; dimensions from the hook length formula. Every target is nonzero modulo each prime separately. Built-in checks: Σ_ν g·dim ν = (dim λ)², g(λ, λ, (n)) = 1, g(λ, λ, (1ⁿ)) = 1.
+
+**Exact cross-check.** A separate Python implementation (Murnaghan–Nakayama on cell sets, exact rationals) matches the checker coefficient for coefficient for n ≤ 22, and confirms no covering square exists for n = 2, 4, 9.
+
+**Scope.** Finite range only. The large-n argument is not checked.

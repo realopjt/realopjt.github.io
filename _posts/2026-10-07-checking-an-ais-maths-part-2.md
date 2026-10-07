@@ -4,35 +4,63 @@ title: "Checking an AI's maths, part 2"
 date: 2026-10-07 12:00:00 +0000
 ---
 
-A second result from OpenAI's maths release checks out: the computer-verified core of its proof of Foulkes' conjecture for sixth powers holds for every case I have run so far, b = 6 to 20, with no exceptions.
+**Short version:** I checked a second result from OpenAI's AI maths release. This one rests on over a million number comparisons, some with numbers 19 digits long. Every comparison I've run so far comes out the way the paper says.
 
-In [part 1]({% post_url 2026-10-07-checking-an-ais-maths %}) I checked a result about symmetric groups. This time I picked something harder: a paper whose proof leans on about 1.2 million exact comparisons of very large whole numbers.
+## The puzzle, in plain English
 
-## What the conjecture says
+Imagine two ways of building with Lego.
 
-Take polynomials of degree b, and then form all products of 6 of them. Now do it the other way round: polynomials of degree 6, multiplied in groups of b. Both give the same total degree, 6b. Foulkes asked in 1950 whether the first collection always fits inside the second, with room to spare, once b is at least 6.
+- **Way 1:** make 6 towers, each b bricks tall, and put them in a box.
+- **Way 2:** make b towers, each 6 bricks tall, and put them in a box.
 
-In practice that means splitting each collection into its basic building blocks and counting how many copies of each block appear. The conjecture says the second count is never smaller than the first, for every block. It was known for groups of up to 5. OpenAI's paper, [Foulkes' Conjecture for the Sixth Symmetric Power](https://github.com/openai/math/blob/main/preprints/Foulkes-Conjecture-for-the-Sixth-Symmetric-Power-September-25-2026/main.pdf), claims the sixth case for every b ≥ 6.
+Same number of bricks either way. In 1950 a mathematician called Foulkes asked: if b is at least 6, does everything you can build the first way also fit inside what you can build the second way?
 
-The proof has three layers. For b from 6 to 25 it compares every count directly by computer. For b up to 149 it uses computer-generated bounds. Beyond that it is a written argument.
+(In the real problem the "bricks" are polynomials, and "fit inside" has a precise meaning, but that's the shape of it.)
 
-## What I checked and found
+It had been proved for 2, 3, 4 and 5 towers. OpenAI's paper claims to prove it for 6.
 
-I checked the first layer, b = 6 to 25, in two ways.
+## How the proof works
 
-- **OpenAI's own code, re-run.** Their programs ran unchanged on separate hardware and matched all 62 published output lines exactly.
-- **A new program, built from scratch.** It counts the building blocks by a different route: it first tallies every individual "weight" of each collection, then converts those tallies into block counts in one final step. OpenAI's code works with the blocks directly and uses shortcut bounds to skip most cases. Mine skips nothing and computes every count exactly.
+The proof has three layers:
 
-Result so far: for every b from 6 to 20, the second count is at least the first for every block, with no exceptions. At b = 20 that is 436,140 blocks compared, with individual counts as large as 4 quintillion (4 × 10¹⁸). b = 21 to 25 are still running and take several hours each.
+1. For b from 6 to 25, a computer compares the two sides directly, piece by piece.
+2. For b up to 149, it uses computer-generated shortcuts.
+3. Beyond that, it's a written argument.
 
-The program also passed four classical test cases with known answers, and at every b its block counts add back up to the exact size of each collection. Where the two programs report comparable numbers, they agree.
+I checked layer 1.
 
-## What a different program means
+## What I found
 
-A different program does not mean a different solution. The mathematical claim is fixed: these counts, compared this way. Two independent programs that compute the same counts by different routes and agree make it very unlikely that a bug produced the answer. If the programs had disagreed, that would have pointed to an error in one of them, or in the paper.
+**So far, it holds up.** For every b from 6 to 20, the second way always has at least as much as the first. No exceptions.
 
-This checks the computational base of the proof only. The bounds for b up to 149 and the written argument beyond that still need review by mathematicians.
+- **I re-ran OpenAI's own code.** It matched their published results exactly.
+- **I wrote my own program from scratch,** which counts everything a different way and checks every single case. OpenAI's code uses shortcuts to skip most of them. At b = 20 mine compared 436,140 pieces, some involving counts as big as 4,000,000,000,000,000,000.
+- **It passed sanity checks** against answers already known from textbooks.
 
-## Code and results
+b = 21 to 25 are still running. They take hours each. I'll update this post when they finish.
 
-Everything is public, with instructions to reproduce it: [github.com/realopjt/foulkes-sixth-power-check](https://github.com/realopjt/foulkes-sixth-power-check). This work was done with Claude (Anthropic). The mathematics and the original computation are OpenAI's.
+## Did I find a different solution?
+
+No. The question and the right answer are fixed. Running a second, independent program is like having a second accountant redo the books from the receipts: if both get the same total, a mistake in the first one is very unlikely. If we'd disagreed, that would have meant an error somewhere.
+
+## What this doesn't prove
+
+Only layer 1. Layers 2 and 3 still need mathematicians to check them.
+
+All code and results: [github.com/realopjt/foulkes-sixth-power-check](https://github.com/realopjt/foulkes-sixth-power-check). Part 1 is [here]({% post_url 2026-10-07-checking-an-ais-maths %}). I did this with help from Claude (Anthropic). The maths is OpenAI's.
+
+---
+
+## For mathematicians
+
+**Claim checked.** The base interval of [Foulkes' Conjecture for the Sixth Symmetric Power](https://github.com/openai/math/blob/main/preprints/Foulkes-Conjecture-for-the-Sixth-Symmetric-Power-September-25-2026/main.pdf): for 6 ≤ b ≤ 25, [s_λ] h_b[h_6] ≥ [s_λ] h_6[h_b] for every λ ⊢ 6b (only ℓ(λ) ≤ 6 matters, since h_6[h_b] has no other constituents). Equivalently Sym⁶(Sym^b V) ↪ Sym^b(Sym⁶ V) in that range.
+
+**Re-run.** `verify_computations.py --run` (unchanged, g++ 13.3, Boost 1.83) passes and matches all 62 reference output rows.
+
+**Independent checker.** Rust, exact 128-bit integers with overflow checks. Unlike the paper's Schur-basis Newton recurrences with signed lookups and an upper bound U to skip most partitions, it works in the weight basis: Newton's identity j·ch Sym^j W = Σ_k ψ^k(W)·ch Sym^{j−k} W on dominant-weight multiplicities, with (ψ^k(W)·χ)(μ) = Σ_{s ∈ wt(W)} χ(sort(μ − k·s)), then Schur multiplicities by the Weyl alternation c(λ) = Σ_{w ∈ S₆} sgn(w) K(λ + δ − wδ). Every partition is computed exactly; no bound is used.
+
+**Checks.** Σ_λ c(λ)·dim₆(λ) equals dim Sym⁶(Sym^b ℂ⁶) and dim Sym^b(Sym⁶ ℂ⁶) at every b; no negative multiplicities; A = B at b = 6. Self-tests: Thrall's h₂[h_q] (q ≤ 12), h₃[h₂], h_q[h₂] (q ≤ 8), h₃[h₃].
+
+**Ties.** Our count of λ with A = B (including A = B = 0) exceeds OpenAI's table by 4 at b = 6, 3 at b = 7, 8 and 2 for b ≥ 9. Their table counts ties only among partitions their U-test could not settle, so this is expected.
+
+**Status.** b = 6 to 20 done, zero violations. b = 21 to 25 running. The certificate layer (26 ≤ b ≤ 149) and the general argument are not checked.
