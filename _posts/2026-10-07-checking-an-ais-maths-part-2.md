@@ -4,7 +4,7 @@ title: "Checking an AI's maths, part 2"
 date: 2026-10-07 12:00:00 +0000
 ---
 
-**Short version:** I checked a second result from OpenAI's AI maths release. This one rests on over a million number comparisons, some with numbers 19 digits long. Every comparison I've run so far comes out the way the paper says.
+**Short version:** I checked a second result from OpenAI's AI maths release. This one rests on over a million number comparisons, some with numbers 25 digits long. Every single comparison comes out the way the paper says.
 
 ## The puzzle, in plain English
 
@@ -31,13 +31,13 @@ I checked layer 1.
 
 ## What I found
 
-**So far, it holds up.** For every b from 6 to 20, the second way always has at least as much as the first. No exceptions.
+**It holds up.** For every b from 6 to 25, the second way always has at least as much as the first. No exceptions.
 
 - **I re-ran OpenAI's own code.** It matched their published results exactly.
-- **I wrote my own program from scratch,** which counts everything a different way and checks every single case. OpenAI's code uses shortcuts to skip most of them. At b = 20 mine compared 436,140 pieces, some involving counts as big as 4,000,000,000,000,000,000.
+- **I wrote my own program from scratch,** which counts everything a different way and checks every single case. OpenAI's code uses shortcuts to skip most of them. At b = 25 mine compared 1,229,120 pieces, some involving counts 25 digits long.
 - **It passed sanity checks** against answers already known from textbooks.
 
-b = 21 to 25 are still running. They take hours each. I'll update this post when they finish.
+The biggest cases ran on GitHub's own servers, with [public logs](https://github.com/realopjt/foulkes-sixth-power-check/actions/runs/37636354843) anyone can inspect.
 
 ## Did I find a different solution?
 
@@ -61,6 +61,6 @@ All code and results: [github.com/realopjt/foulkes-sixth-power-check](https://gi
 
 **Checks.** Σ_λ c(λ)·dim₆(λ) equals dim Sym⁶(Sym^b ℂ⁶) and dim Sym^b(Sym⁶ ℂ⁶) at every b; no negative multiplicities; A = B at b = 6. Self-tests: Thrall's h₂[h_q] (q ≤ 12), h₃[h₂], h_q[h₂] (q ≤ 8), h₃[h₃].
 
-**Ties.** Our count of λ with A = B (including A = B = 0) exceeds OpenAI's table by 4 at b = 6, 3 at b = 7, 8 and 2 for b ≥ 9. Their table counts ties only among partitions their U-test could not settle, so this is expected.
+**Ties.** Our count of λ with A = B (including A = B = 0) exceeds OpenAI's table by 4 at b = 6, 3 at b = 7, 8 and 2 for every b from 9 to 25. Their table counts ties only among partitions their U-test could not settle, so this is expected.
 
-**Status.** b = 6 to 20 done, zero violations. b = 21 to 25 running. The certificate layer (26 ≤ b ≤ 149) and the general argument are not checked.
+**Status.** The full base interval b = 6 to 25 is done, zero violations; at b = 25 we check 1,229,120 partitions, matching the paper's count for its largest complete level. The certificate layer (26 ≤ b ≤ 149) and the general argument are not checked.
