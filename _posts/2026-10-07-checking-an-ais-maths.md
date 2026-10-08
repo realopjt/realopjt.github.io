@@ -16,13 +16,17 @@ I'm not a mathematician. But some of these proofs lean on a big computer calcula
 
 ## The puzzle, in plain English
 
-Think of a deck of n cards. There are lots of ways to shuffle it, and mathematicians break all those shuffles down into a set of basic "ingredients".
+Take a deck of cards and think about all the ways you can shuffle it.
 
-The puzzle asks: for almost every deck size, is there one ingredient that, when you combine it with itself, produces every ingredient at least once?
+Mathematicians study shuffles by watching what they do to things. The simplest example is the cards themselves: a shuffle moves each card to a new place. You can also watch what a shuffle does to *pairs* of cards, or to more complicated patterns. Each of these is a different way of looking at the same shuffles.
 
-It's a bit like asking whether one paint colour, mixed with itself the right way, can produce every colour on the chart.
+Some of these views can be split into smaller, separate parts that never mix, and some can't be split any further. The ones that can't be split are the basic **building blocks**. Every other view is made of them, a bit like every whole number is made of primes. A deck of a given size has a fixed list of building blocks.
 
-The paper says yes, for every deck size except 2, 4 and 9. For big decks it gives a written argument. For decks up to 64 cards it relies on the computer to check each case. That computer part is what I checked.
+**Combining a building block with itself** means looking at pairs instead of single items. With 3 cards (A, B, C), instead of watching where each card goes, you watch where every *pair* goes: (A,A), (A,B), (B,C) and so on, 9 pairs in all. A shuffle that sends A to B and B to C turns the pair (A,B) into (B,C). This bigger collection then breaks back down into building blocks.
+
+**The puzzle:** for almost every deck size, is there one building block that, combined with itself this way, breaks down into a list containing *every* building block at least once?
+
+The paper says yes, for every deck size except 2, 4 and 9, where it is known to fail. For big decks it gives a written argument. For decks up to 64 cards it relies on a computer to check each case, and that computer part is what I checked.
 
 ## What I found
 
